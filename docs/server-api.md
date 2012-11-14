@@ -23,7 +23,7 @@ Phase 8 improves the KDF, and adds KDF parameters to each account:
 
 For the initial phases of this project, we rely upon TLS to protect all requests and responses. A later phase will replace parts of this API with SRP-based messages, to reduce our reliance on TLS.
 
-All requests carry their arguments in a JSON payload in the HTTP request body. The Request-Type header should be "application/json", but the server should ignore it. Answers are also delivered in a JSON response body.
+All requests use POST, even those with no side-effects. Requests carry their arguments in a JSON payload in the HTTP request body. The Request-Type header should be "application/json", but the server should ignore it. Answers are also delivered in a JSON response body.
 
 Success/failure is indicated through the HTTP response code, either 200 OK with a JSON response body, or some 4xx failure and a simple string in the response body. In the early phases, application-level errors (e.g. create_account when the email address is already associated with an account) are mapped to 4xx HTTP error codes.
 

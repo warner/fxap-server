@@ -1,0 +1,9 @@
+{
+    "name": "fxap-dummy-server",
+    "author": "Brian Warner",
+    "version": "0.0.1",
+    "dependencies": {
+        "express": ">= 3.0.3",
+        "base64": ">= 2.0.7"
+    }
+}
