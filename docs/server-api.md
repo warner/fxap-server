@@ -57,14 +57,14 @@ Responses:
 
 Request parameters:
 
-* userid : printable string
+* email : unicode string
 * S1: base-64 encoded binary string
 * pubkey: printable representation of public key (JWK?)
 
 Responses:
 * 200 OK, {cert: (printable representation of signed key)}
 * 401 UNAUTHORIZED, "bad authorization string"
-* 404 NOT FOUND, "unknown userid"
+* 404 NOT FOUND, "unknown email address
 * 400 BAD REQUEST, "malformed public key"
 
 ### /api/set_keys
