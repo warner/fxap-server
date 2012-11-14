@@ -8,12 +8,12 @@ var useridToData = {};
 var nextUserid = 0;
 
 var app = express();
-app.use(express.logger);
+app.use(express.logger());
 app.use(express.bodyParser());
-/*app.use(function(req, res, next) {
+app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     return next();
-    });*/
+    });
 
 function create_salt() {
     // the salt merely needs to be unique, not unguessable (since we hand it
@@ -34,9 +34,12 @@ function compare(a, b) {
     return reduction == 0;
 }
 
+function sign_key(email, pubkey) {
+    return "ok signed";
+}
+
 app.post("/api/create_account", function(req, res) {
-    console.log("in create_account");
-    var email = req.params.email;
+    var email = req.body.email;
     if (email.indexOf("@") == -1)
         return res.send(400, "malformed email address"); // minimal
     var userid = emailToUserid[email];
@@ -46,60 +49,60 @@ app.post("/api/create_account", function(req, res) {
     nextUserid += 1;
     emailToUserid[email] = userid;
     var salt = create_salt();
-    useridToData[userid] = {S1: req.params.S1,
+    useridToData[userid] = {S1: req.body.S1,
                             salt: salt,
                             WSUK: undefined,
                             RUK: create_random(32)
                            };
-    return res.json({userid: userid,
+    return res.send({userid: userid,
                      salt: salt});
 });
 
 app.post("/api/get_userid", function(req, res) {
-    var userid = emailToUserid[req.params.email];
+    var userid = emailToUserid[req.body.email];
     if (userid === undefined)
         return res.send(404, "unknown email address");
-    return res.json({userid: userid,
+    return res.send({userid: userid,
                      salt: useridToData[userid].salt});
 });
 
 app.post("/api/sign_key", function(req, res) {
-    var userid = emailToUserid[req.params.email];
+    var userid = emailToUserid[req.body.email];
     if (userid === undefined)
         return res.send(404, "unknown email address");
     var data = useridToData[userid];
-    if (!compare(req.params.S1, data.S1))
+    if (!compare(req.body.S1, data.S1))
         return res.send(401, "bad authorization string");
-    var pubkey = req.params.pubkey;
+    var pubkey = req.body.pubkey;
     if (!pubkey)
         return res.send(400, "malformed public key");
-    var signed = sign_key(req.params.email, pubkey);
-    return res.json({cert: signed});
+    var signed = sign_key(req.body.email, pubkey);
+    return res.send({cert: signed});
 });
 
 app.post("/api/set_keys", function(req, res) {
-    var userid = req.params.userid;
+    var userid = req.body.userid;
     var data = useridToData[userid];
     if (data === undefined)
-        return res.send(404, "unknown email address");
-    if (!compare(req.params.S1, data.S1))
+        return res.send(404, "unknown userid");
+    if (!compare(req.body.S1, data.S1))
         return res.send(401, "bad authorization string");
-    data.WSUK = req.params.WSUK;
-    return res.json({});
+    data.WSUK = req.body.WSUK;
+    return res.send({});
 });
 
 app.post("/api/get_keys", function(req, res) {
-    var userid = req.params.userid;
+    var userid = req.body.userid;
     var data = useridToData[userid];
     if (data === undefined)
-        return res.send(404, "unknown email address");
-    if (!compare(req.params.S1, data.S1))
+        return res.send(404, "unknown userid");
+    if (!compare(req.body.S1, data.S1))
         return res.send(401, "bad authorization string");
-    return res.json({WSUK: data.WSUK, RUK: data.RUK});
+    return res.send({WSUK: data.WSUK, RUK: data.RUK});
 });
 
 app.post("/api/get_entropy", function(req, res) {
-    return res.json({entropy: create_random(32)});
+    return res.send({entropy: create_random(32)});
 });
 
 app.listen(8081);
