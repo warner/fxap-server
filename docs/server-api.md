@@ -5,7 +5,7 @@
 For phase 1, the server is expected to manage "accounts", which contain:
 
 * one or more email addresses
-* __salt__: base32 string, 128 bits / 26 characters, server-generated
+* __salt__: base32 string, 128 bits / 26 characters, client-generated
 * __S1__: authentication string, base32-encoded, 256 bits / 52 characters, client-generated
 
 Phase 3 introduces server-maintained wrapped keys, which adds the following to each account:
@@ -34,11 +34,12 @@ In phase 7, when requests are protected by SRP, application errors are reported 
 Request parameters:
 
 * email : unicode string
+* salt : base32-encoded binary salt string
 * S1 : base64-encoded binary authorization string
 
 Responses:
 
-* 200 OK, {userid: (printable string), salt: (base64-encoded binary) }
+* 200 OK, {userid: (printable string) }
 * 409 CONFLICT, "email already in use"
 * 400 BAD REQUEST, "malformed email address"
 

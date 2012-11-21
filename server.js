@@ -15,11 +15,6 @@ app.use(function(req, res, next) {
     return next();
     });
 
-function create_salt() {
-    // the salt merely needs to be unique, not unguessable (since we hand it
-    // out to anyone who asks). 128 bits is enough for that.
-    return create_random(16);
-}
 function create_random(len) {
     return base64.encode(crypto.randomBytes(len));
 }
@@ -48,14 +43,12 @@ app.post("/api/create_account", function(req, res) {
     userid = ""+nextUserid; // as string
     nextUserid += 1;
     emailToUserid[email] = userid;
-    var salt = create_salt();
     useridToData[userid] = {S1: req.body.S1,
-                            salt: salt,
+                            salt: req.body.salt,
                             WSUK: undefined,
                             RUK: create_random(32)
                            };
-    return res.send({userid: userid,
-                     salt: salt});
+    return res.send({userid: userid});
 });
 
 app.post("/api/get_userid", function(req, res) {
